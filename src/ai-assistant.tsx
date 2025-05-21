@@ -28,13 +28,11 @@ export default function AIWritingAssistant() {
     suggestions_made: 0,
   });
 
-  // Update word count when text changes
   useEffect(() => {
     const words = text.match(/\b\w+\b/g) || [];
     setWordCount(words.length);
   }, [text]);
 
-  // Fetch current stats
   const fetchStats = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/stats`);
@@ -47,7 +45,6 @@ export default function AIWritingAssistant() {
     }
   };
 
-  // Start progress simulation
   const startProgress = () => {
     setProgress(0);
     let progressInterval = setInterval(() => {
@@ -62,7 +59,6 @@ export default function AIWritingAssistant() {
     return progressInterval;
   };
 
-  // Check grammar using real API
   const checkGrammar = async () => {
     if (text.length < 5) {
       setSuggestions("Please enter more text for grammar checking.");
@@ -93,9 +89,8 @@ export default function AIWritingAssistant() {
           formattedSuggestions += "No grammar issues found. Great job!\n\n";
         } else {
           data.grammar_issues.forEach((issue: any, index: any) => {
-            formattedSuggestions += `**${index + 1}. Error:** "${
-              issue.error
-            }"\n`;
+            formattedSuggestions += `**${index + 1}. Error:** "${issue.error
+              }"\n`;
             formattedSuggestions += `   **Context:** "...${issue.context}..."\n`;
             formattedSuggestions += `   **Suggestion:** ${issue.suggestions.join(
               ", "
@@ -125,7 +120,6 @@ export default function AIWritingAssistant() {
     }
   };
 
-  // Analyze text using real API
   const analyzeText = async () => {
     if (text.length < 5) {
       setSuggestions("Please enter more text for analysis.");
@@ -163,7 +157,6 @@ export default function AIWritingAssistant() {
           2
         )} words\n\n`;
 
-        // Add readability issues
         if (data.readability_issues && data.readability_issues.length > 0) {
           formattedAnalysis += "### Readability Issues\n\n";
           data.readability_issues.forEach((issue) => {
@@ -171,22 +164,19 @@ export default function AIWritingAssistant() {
           });
         }
 
-        // Add sentiment analysis
         formattedAnalysis += "### Sentiment Analysis\n\n";
         formattedAnalysis += `Overall tone: ${analysis.overall_sentiment}\n`;
         formattedAnalysis += `Positive paragraphs: ${analysis.positive_paragraphs}\n`;
         formattedAnalysis += `Negative paragraphs: ${analysis.negative_paragraphs}\n\n`;
 
-        // Add paragraph sentiment details
         if (
           analysis.sentiment_results &&
           analysis.sentiment_results.length > 0
         ) {
           formattedAnalysis += "### Paragraph Sentiment Details\n\n";
           analysis.sentiment_results.forEach((result, index) => {
-            formattedAnalysis += `${index + 1}. "${result.preview}": ${
-              result.label
-            } (${result.score.toFixed(2)})\n`;
+            formattedAnalysis += `${index + 1}. "${result.preview}": ${result.label
+              } (${result.score.toFixed(2)})\n`;
           });
         }
 
@@ -208,7 +198,6 @@ export default function AIWritingAssistant() {
     }
   };
 
-  // Suggest improvements using real API
   const suggestImprovements = async () => {
     if (text.length < 10) {
       setSuggestions("Please enter more text for meaningful suggestions.");
@@ -236,7 +225,6 @@ export default function AIWritingAssistant() {
         const suggestions = data.suggestions;
         let formattedSuggestions = "## Writing Improvement Suggestions\n\n";
 
-        // Long sentences
         if (
           suggestions.long_sentences &&
           suggestions.long_sentences.length > 0
@@ -249,7 +237,6 @@ export default function AIWritingAssistant() {
           });
         }
 
-        // Passive voice
         if (suggestions.passive_voice && suggestions.passive_voice.length > 0) {
           formattedSuggestions += "### Passive Voice\n";
           formattedSuggestions +=
@@ -259,7 +246,6 @@ export default function AIWritingAssistant() {
           });
         }
 
-        // Repeated words
         if (
           suggestions.repeated_words &&
           suggestions.repeated_words.length > 0
@@ -268,13 +254,11 @@ export default function AIWritingAssistant() {
           formattedSuggestions +=
             "Consider revising these sentences with repeated words:\n\n";
           suggestions.repeated_words.forEach((item, index) => {
-            formattedSuggestions += `${index + 1}. "${
-              item.sentence
-            }" (repeated: "${item.repeated_word}")\n\n`;
+            formattedSuggestions += `${index + 1}. "${item.sentence
+              }" (repeated: "${item.repeated_word}")\n\n`;
           });
         }
 
-        // General suggestions
         if (
           suggestions.general_suggestions &&
           suggestions.general_suggestions.length > 0
@@ -357,14 +341,11 @@ export default function AIWritingAssistant() {
     }
   };
 
-  // Apply the text completion to the editor
   const applyCompletion = () => {
     if (suggestions.includes("Text Completion Suggestion")) {
-      // Extract the generated text from suggestions
       const match = suggestions.match(/\.\.\.(.+?)\n\n/s);
       if (match && match[1]) {
         const completionText = match[1];
-        // Find the last part that matches the prompt and use what follows
         const promptPart = completionText.substring(
           0,
           Math.min(100, completionText.length)
@@ -372,10 +353,8 @@ export default function AIWritingAssistant() {
         const textIndex = text.lastIndexOf(promptPart);
 
         if (textIndex !== -1) {
-          // Apply only the new text (avoid duplicating the prompt)
           setText(text + completionText.substring(promptPart.length));
         } else {
-          // Fallback: just append the generated text
           setText(text + " " + completionText);
         }
         setStatus("Text completion applied");
@@ -395,7 +374,6 @@ export default function AIWritingAssistant() {
     setSuggestions("");
     setStatus("New document created");
 
-    // Reset stats with API call
     fetch(`${API_BASE_URL}/reset`, {
       method: "POST",
     })
@@ -410,7 +388,6 @@ export default function AIWritingAssistant() {
       });
   };
 
-  // Initial stats load when component mounts
   useEffect(() => {
     fetchStats();
   }, []);
@@ -453,7 +430,6 @@ export default function AIWritingAssistant() {
     </div>
   );
 
-  // Simple markdown renderer
   const renderMarkdown = (md: any) => {
     return md
       .replace(/## (.*)/g, '<h2 class="text-xl font-bold mt-4 mb-2">$1</h2>')
@@ -465,7 +441,6 @@ export default function AIWritingAssistant() {
 
   return (
     <div className="flex flex-col w-full max-w-6xl mx-auto p-4 h-[90vh] bg-white text-gray-800">
-      {/* Header */}
       <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-200">
         <div className="flex items-center">
           <Feather className="mr-2 text-blue-600" size={24} />
@@ -482,31 +457,19 @@ export default function AIWritingAssistant() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex flex-1 h-0 space-x-4">
-        {/* Left side - Editor */}
         <div className="w-1/2 flex flex-col">
           <div className="flex mb-2">
             <button
-              className={`px-3 py-1 rounded-t-md ${
-                activeTab === "editor"
-                  ? "bg-white border-t border-l border-r border-gray-300"
-                  : "bg-gray-100"
-              }`}
+              className={`px-3 py-1 rounded-t-md ${activeTab === "editor"
+                ? "bg-white border-t border-l border-r border-gray-300"
+                : "bg-gray-100"
+                }`}
               onClick={() => setActiveTab("editor")}
             >
               <FileText className="inline mr-1" size={16} /> Editor
             </button>
-            <button
-              className={`px-3 py-1 rounded-t-md ${
-                activeTab === "code"
-                  ? "bg-white border-t border-l border-r border-gray-300"
-                  : "bg-gray-100"
-              }`}
-              onClick={() => setActiveTab("code")}
-            >
-              <Code className="inline mr-1" size={16} /> Code View
-            </button>
+
           </div>
           <div className="flex-1 border border-gray-300 rounded-md overflow-hidden">
             {activeTab === "editor" ? (
@@ -535,7 +498,6 @@ checkGrammar(text).then(results => {
           </div>
         </div>
 
-        {/* Right side - Suggestions panel */}
         <div className="w-1/2 flex flex-col">
           <div className="flex mb-2">
             <button className="px-3 py-1 rounded-t-md bg-white border-t border-l border-r border-gray-300">
@@ -567,9 +529,7 @@ checkGrammar(text).then(results => {
         </div>
       </div>
 
-      {/* Bottom toolbar */}
       <div className="mt-4 flex flex-col">
-        {/* Progress bar */}
         {isLoading && (
           <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
             <div
@@ -579,7 +539,6 @@ checkGrammar(text).then(results => {
           </div>
         )}
 
-        {/* Action buttons */}
         <div className="flex justify-between items-center">
           <div className="flex space-x-2">
             <button
